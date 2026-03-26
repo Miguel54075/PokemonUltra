@@ -1,0 +1,12 @@
+{
+  "name": "pokemon-ultra",
+  "version": "1.0.0",
+  "description": "PokeDex Ultra - Node.js Server",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
