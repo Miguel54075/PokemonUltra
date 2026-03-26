@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PokéDex Ultra — Enciclopédia Completa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --card: #141c2e;
+    --border: #1e2d4a;
+    --text: #e8f0ff;
+    --muted: #7a8fb0;
+    --accent: #f7c948;
+    --accent2: #4fc3f7;
+    --red: #ef5350;
+    --radius: 16px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.5);
+
+    --normal:#A8A77A;--fire:#EE8130;--water:#6390F0;--electric:#F7D02C;
+    --grass:#7AC74C;--ice:#96D9D6;--fighting:#C22E28;--poison:#A33EA1;
+    --ground:#E2BF65;--flying:#A98FF3;--psychic:#F95587;--bug:#A6B91A;
+    --rock:#B6A136;--ghost:#735797;--dragon:#6F35FC;--dark:#705746;
+    --steel:#B7B7CE;--fairy:#D685AD;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+  /* HEADER */
+  header{background:linear-gradient(135deg,#0d1b35,#1a0a2e);border-bottom:2px solid var(--accent);padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,0.6);}
+  .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:20px;height:64px;}
+  .logo{font-family:'Press Start 2P',monospace;font-size:14px;color:var(--accent);text-shadow:0 0 20px rgba(247,201,72,0.5);white-space:nowrap;cursor:pointer;}
+  .logo span{color:var(--accent2);}
+  nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto;}
+  nav button{background:none;border:none;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  nav button:hover,nav button.active{color:var(--accent);background:rgba(247,201,72,0.1);}
+
+  /* PAGES */
+  .page{display:none;max-width:1400px;margin:0 auto;padding:32px 24px;}
+  .page.active{display:block;}
+  .page-title{font-family:'Press Start 2P',monospace;font-size:18px;color:var(--accent);margin-bottom:8px;}
+  .page-sub{color:var(--muted);margin-bottom:28px;font-size:15px;}
+
+  /* SEARCH / FILTER BAR */
+  .search-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;align-items:center;}
+  .search-bar input,.search-bar select{background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:10px 16px;font-family:'Nunito',sans-serif;font-size:14px;outline:none;transition:border .2s;}
+  .search-bar input{flex:1;min-width:200px;}
+  .search-bar input:focus,.search-bar select:focus{border-color:var(--accent);}
+  .search-bar select option{background:var(--bg2);}
+
+  /* POKEMON GRID */
+  .poke-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;}
+  .poke-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+  .poke-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;}
+  .poke-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--accent);}
+  .poke-card:hover::before{opacity:0.06;}
+  .poke-number{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px;}
+  .poke-img{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));}
+  .poke-img-hd{width:96px;height:96px;object-fit:contain;}
+  .poke-name{font-weight:800;font-size:13px;text-transform:capitalize;margin:8px 0 6px;}
+  .types{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
+  .type-badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;color:#fff;}
+
+  /* LOADER */
+  .loader{text-align:center;padding:60px;color:var(--muted);}
+  .spinner{width:48px;height:48px;border:4px solid var(--border);border-top:4px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* LOAD MORE */
+  .load-more{text-align:center;margin-top:32px;}
+  .btn{background:var(--accent);color:#1a0a00;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;border:none;border-radius:10px;padding:12px 32px;cursor:pointer;transition:all .2s;}
+  .btn:hover{filter:brightness(1.1);transform:translateY(-2px);}
+  .btn-outline{background:transparent;border:2px solid var(--accent);color:var(--accent);}
+  .btn-outline:hover{background:var(--accent);color:#1a0a00;}
+  .btn-sm{padding:7px 18px;font-size:12px;}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);z-index:200;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg2);border:2px solid var(--border);border-radius:24px;max-width:820px;width:100%;padding:32px;position:relative;animation:slideUp .3s ease;}
+  @keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;transition:color .2s;}
+  .modal-close:hover{color:var(--red);}
+  .modal-header{display:flex;gap:24px;align-items:center;margin-bottom:24px;flex-wrap:wrap;}
+  .modal-img{width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 8px 20px rgba(0,0,0,0.6));}
+  .modal-title-area h2{font-family:'Press Start 2P',monospace;font-size:16px;color:var(--accent);text-transform:capitalize;line-height:1.6;}
+  .modal-title-area .poke-number{font-size:13px;margin-bottom:8px;}
+  .modal-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+  .tab-btn{background:var(--card);border:1.5px solid var(--border);color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:7px 16px;border-radius:8px;cursor:pointer;transition:all .2s;}
+  .tab-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* STATS */
+  .stats-grid{display:grid;gap:10px;}
+  .stat-row{display:flex;align-items:center;gap:12px;}
+  .stat-name{font-size:12px;font-weight:700;color:var(--muted);width:90px;text-transform:uppercase;flex-shrink:0;}
+  .stat-val{font-weight:900;font-size:14px;width:36px;flex-shrink:0;}
+  .stat-bar{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+  .stat-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+
+  /* INFO GRID */
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+  .info-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .info-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;}
+  .info-value{font-weight:800;font-size:14px;text-transform:capitalize;}
+
+  /* MOVES TABLE */
+  .moves-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .moves-table th{background:var(--card);padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);}
+  .moves-table td{padding:8px 12px;border-bottom:1px solid var(--border);}
+  .moves-table tr:hover td{background:rgba(255,255,255,0.03);}
+  .moves-table-wrap{max-height:320px;overflow-y:auto;border-radius:12px;border:1px solid var(--border);}
+
+  /* ABILITIES */
+  .ability-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+  .ability-name{font-weight:800;font-size:14px;text-transform:capitalize;margin-bottom:6px;}
+  .ability-desc{font-size:13px;color:var(--muted);line-height:1.5;}
+  .hidden-badge{font-size:10px;background:var(--ghost);color:#fff;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle;}
+
+  /* EVO CHAIN */
+  .evo-chain{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .evo-item{text-align:center;cursor:pointer;}
+  .evo-item img{width:80px;height:80px;object-fit:contain;}
+  .evo-item span{display:block;font-size:12px;font-weight:700;text-transform:capitalize;}
+  .evo-arrow{color:var(--muted);font-size:20px;}
+  .evo-trigger{font-size:10px;color:var(--accent);display:block;}
+
+  /* SECTION HEADERS */
+  .section-header{margin:32px 0 20px;display:flex;align-items:baseline;gap:12px;}
+  .section-header h2{font-family:'Press Start 2P',monospace;font-size:14px;color:var(--accent2);}
+  .section-header span{color:var(--muted);font-size:13px;}
+
+  /* ITEMS GRID */
+  .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+  .item-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:all .2s;}
+  .item-card:hover{border-color:var(--accent2);transform:translateY(-2px);}
+  .item-icon{width:48px;height:48px;object-fit:contain;flex-shrink:0;}
+  .item-info .item-name{font-weight:800;font-size:13px;text-transform:capitalize;margin-bottom:4px;}
+  .item-info .item-cat{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;}
+  .item-info .item-cost{font-size:11px;color:var(--muted);margin-top:2px;}
+
+  /* ITEM MODAL */
+  .item-desc{color:var(--muted);line-height:1.6;font-size:14px;margin-top:8px;}
+
+  /* NATURES TABLE */
+  .natures-table{width:100%;border-collapse:collapse;}
+  .natures-table th,.natures-table td{padding:10px 14px;border:1px solid var(--border);font-size:13px;}
+  .natures-table th{background:var(--card);font-size:11px;text-transform:uppercase;color:var(--muted);}
+  .natures-table .up{color:#4caf50;font-weight:800;}
+  .natures-table .down{color:var(--red);font-weight:800;}
+  .natures-table .neutral{color:var(--muted);}
+  .natures-table tr:hover td{background:rgba(255,255,255,0.02);}
+  .natures-table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+
+  /* IVs EVs */
+  .ivev-section{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;}
+  @media(max-width:600px){.ivev-section{grid-template-columns:1fr;}}
+  .ivev-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:24px;}
+  .ivev-card h3{font-family:'Press Start 2P',monospace;font-size:13px;margin-bottom:16px;}
+  .ivev-card p{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:12px;}
+  .ev-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .ev-table th,.ev-table td{padding:8px 10px;border:1px solid var(--border);}
+  .ev-table th{background:var(--bg3);font-size:11px;text-transform:uppercase;color:var(--muted);}
+
+  /* MOVES PAGE */
+  .moves-page-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .moves-page-table th{background:var(--card);padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);position:sticky;top:0;}
+  .moves-page-table td{padding:9px 12px;border-bottom:1px solid var(--border);}
+  .moves-page-table tr:hover td{background:rgba(255,255,255,0.03);}
+  .moves-page-wrap{overflow:auto;max-height:600px;border-radius:12px;border:1px solid var(--border);}
+  .move-cat{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;}
+  .cat-physical{background:#b85c00;color:#fff;}
+  .cat-special{background:#5c4c9c;color:#fff;}
+  .cat-status{background:#555;color:#fff;}
+
+  /* BERRIES */
+  .berry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+  .berry-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;}
+  .berry-card:hover{border-color:#7AC74C;transform:translateY(-3px);}
+  .berry-img{width:64px;height:64px;object-fit:contain;margin-bottom:8px;}
+  .berry-name{font-weight:800;font-size:13px;text-transform:capitalize;margin-bottom:4px;}
+  .berry-flavor{font-size:11px;color:var(--muted);}
+
+  /* GENERATION BADGES */
+  .gen-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;border:1.5px solid currentColor;margin-bottom:8px;}
+
+  /* SCROLL */
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#000;font-weight:700;padding:12px 20px;border-radius:12px;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;font-size:13px;}
+  .toast.show{transform:translateY(0);opacity:1;}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#0d1b35 0%,#1a0a2e 50%,#0a1a0e 100%);border-radius:24px;padding:48px 40px;margin-bottom:40px;position:relative;overflow:hidden;border:1.5px solid var(--border);}
+  .hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+  .hero h1{font-family:'Press Start 2P',monospace;font-size:28px;color:var(--accent);line-height:1.6;margin-bottom:16px;position:relative;z-index:1;}
+  .hero h1 span{color:var(--accent2);}
+  .hero p{color:var(--muted);font-size:16px;max-width:600px;line-height:1.7;position:relative;z-index:1;}
+  .hero-stats{display:flex;gap:32px;margin-top:32px;flex-wrap:wrap;position:relative;z-index:1;}
+  .hero-stat{text-align:center;}
+  .hero-stat .num{font-family:'Press Start 2P',monospace;font-size:22px;color:var(--accent2);}
+  .hero-stat .label{font-size:12px;color:var(--muted);margin-top:4px;}
+  @media(max-width:700px){.hero h1{font-size:18px;}.header-inner{height:auto;flex-wrap:wrap;padding:10px 0;}}
+
+  .pill-btn{background:var(--card);border:1.5px solid var(--border);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all .2s;}
+  .pill-btn.active,.pill-btn:hover{background:var(--accent);color:#000;border-color:var(--accent);}
+  .gen-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo" onclick="navigate('home')">Poké<span>Dex</span> Ultra</div>
+    <nav>
+      <button class="active" onclick="navigate('pokemon')">🎮 Pokémon</button>
+      <button onclick="navigate('items')">🎒 Itens</button>
+      <button onclick="navigate('berries')">🍒 Frutas</button>
+      <button onclick="navigate('moves')">⚡ Ataques</button>
+      <button onclick="navigate('natures')">🌀 Naturezas</button>
+      <button onclick="navigate('ivev')">📊 IVs & EVs</button>
+    </nav>
+  </div>
+</header>
+
+<!-- POKEMON PAGE -->
+<div class="page active" id="page-pokemon">
+  <div class="hero">
+    <h1>Bem-vindo à<br><span>PokéDex Ultra</span></h1>
+    <p>Enciclopédia completa de todas as gerações Pokémon — da Gen I à Gen X (Winds & Waves). Explore Pokémon, itens, frutas, ataques, naturezas e muito mais!</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num" id="total-pokemon">1028</div><div class="label">Pokémon</div></div>
+      <div class="hero-stat"><div class="num">10</div><div class="label">Gerações</div></div>
+      <div class="hero-stat"><div class="num">18</div><div class="label">Tipos</div></div>
+      <div class="hero-stat"><div class="num">800+</div><div class="label">Ataques</div></div>
+    </div>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="poke-search" placeholder="🔍  Buscar Pokémon por nome ou número..." oninput="filterPokemon()">
+    <select id="type-filter" onchange="filterPokemon()">
+      <option value="">Todos os tipos</option>
+      <option value="normal">Normal</option><option value="fire">Fogo</option><option value="water">Água</option>
+      <option value="electric">Elétrico</option><option value="grass">Planta</option><option value="ice">Gelo</option>
+      <option value="fighting">Lutador</option><option value="poison">Veneno</option><option value="ground">Terra</option>
+      <option value="flying">Voador</option><option value="psychic">Psíquico</option><option value="bug">Inseto</option>
+      <option value="rock">Pedra</option><option value="ghost">Fantasma</option><option value="dragon">Dragão</option>
+      <option value="dark">Sombrio</option><option value="steel">Aço</option><option value="fairy">Fada</option>
+    </select>
+  </div>
+  <div class="gen-filters" id="gen-filters">
+    <button class="pill-btn active" onclick="setGen('all',this)">Todas</button>
+    <button class="pill-btn" onclick="setGen('1',this)">Gen I</button>
+    <button class="pill-btn" onclick="setGen('2',this)">Gen II</button>
+    <button class="pill-btn" onclick="setGen('3',this)">Gen III</button>
+    <button class="pill-btn" onclick="setGen('4',this)">Gen IV</button>
+    <button class="pill-btn" onclick="setGen('5',this)">Gen V</button>
+    <button class="pill-btn" onclick="setGen('6',this)">Gen VI</button>
+    <button class="pill-btn" onclick="setGen('7',this)">Gen VII</button>
+    <button class="pill-btn" onclick="setGen('9',this)">Gen IX</button>
+    <button class="pill-btn" onclick="setGen('10',this)" style="border-color:var(--accent2);color:var(--accent2);">Gen X ✨</button>
+  </div>
+  <div id="poke-grid" class="poke-grid"></div>
+  <div id="poke-loader" class="loader"><div class="spinner"></div><p>Carregando Pokémon...</p></div>
+  <div class="load-more" id="load-more" style="display:none;">
+    <button class="btn" onclick="loadMorePokemon()">Carregar mais Pokémon</button>
+  </div>
+</div>
+
+<!-- ITEMS PAGE -->
+<div class="page" id="page-items">
+  <div class="page-title">🎒 Itens</div>
+  <div class="page-sub">Todos os itens dos jogos Pokémon — equipamentos, medicamentos, pokébolas e mais.</div>
+  <div class="search-bar">
+    <input type="text" id="item-search" placeholder="🔍  Buscar item..." oninput="filterItems()">
+    <select id="item-cat-filter" onchange="filterItems()">
+      <option value="">Todas as categorias</option>
+    </select>
+  </div>
+  <div id="items-grid" class="items-grid"></div>
+  <div id="items-loader" class="loader"><div class="spinner"></div><p>Carregando itens...</p></div>
+  <div class="load-more" id="items-load-more" style="display:none;"><button class="btn" onclick="loadMoreItems()">Carregar mais</button></div>
+</div>
+
+<!-- BERRIES PAGE -->
+<div class="page" id="page-berries">
+  <div class="page-title">🍒 Frutas (Berries)</div>
+  <div class="page-sub">Todas as frutas disponíveis nos jogos Pokémon e seus efeitos.</div>
+  <div class="search-bar">
+    <input type="text" id="berry-search" placeholder="🔍  Buscar fruta..." oninput="filterBerries()">
+  </div>
+  <div id="berries-grid" class="berry-grid"></div>
+  <div id="berries-loader" class="loader"><div class="spinner"></div><p>Carregando frutas...</p></div>
+</div>
+
+<!-- MOVES PAGE -->
+<div class="page" id="page-moves">
+  <div class="page-title">⚡ Ataques</div>
+  <div class="page-sub">Base de dados completa de todos os ataques Pokémon.</div>
+  <div class="search-bar">
+    <input type="text" id="move-search" placeholder="🔍  Buscar ataque..." oninput="filterMoves()">
+    <select id="move-type-filter" onchange="filterMoves()">
+      <option value="">Todos os tipos</option>
+      <option value="normal">Normal</option><option value="fire">Fogo</option><option value="water">Água</option>
+      <option value="electric">Elétrico</option><option value="grass">Planta</option><option value="ice">Gelo</option>
+      <option value="fighting">Lutador</option><option value="poison">Veneno</option><option value="ground">Terra</option>
+      <option value="flying">Voador</option><option value="psychic">Psíquico</option><option value="bug">Inseto</option>
+      <option value="rock">Pedra</option><option value="ghost">Fantasma</option><option value="dragon">Dragão</option>
+      <option value="dark">Sombrio</option><option value="steel">Aço</option><option value="fairy">Fada</option>
+    </select>
+    <select id="move-cat-filter" onchange="filterMoves()">
+      <option value="">Todas as categorias</option>
+      <option value="physical">Físico</option>
+      <option value="special">Especial</option>
+      <option value="status">Status</option>
+    </select>
+  </div>
+  <div class="moves-page-wrap">
+    <table class="moves-page-table">
+      <thead><tr><th>Nome</th><th>Tipo</th><th>Cat.</th><th>Poder</th><th>Precisão</th><th>PP</th><th>Efeito</th></tr></thead>
+      <tbody id="moves-tbody"></tbody>
+    </table>
+  </div>
+  <div id="moves-loader" class="loader"><div class="spinner"></div><p>Carregando ataques...</p></div>
+</div>
+
+<!-- NATURES PAGE -->
+<div class="page" id="page-natures">
+  <div class="page-title">🌀 Naturezas</div>
+  <div class="page-sub">As 25 naturezas e seus efeitos nos atributos dos Pokémon.</div>
+  <div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;">
+    <p style="color:var(--muted);line-height:1.7;font-size:14px;">
+      As naturezas aumentam um atributo em <strong style="color:#4caf50;">+10%</strong> e diminuem outro em <strong style="color:var(--red);">-10%</strong>. 
+      Naturezas neutras (Hardy, Docile, Serious, Bashful, Quirky) não afetam os atributos. 
+      Cada natureza também determina o sabor de Poffin/Berry preferido e odiado pelo Pokémon.
+    </p>
+  </div>
+  <div id="natures-content"><div class="loader"><div class="spinner"></div><p>Carregando naturezas...</p></div></div>
+</div>
+
+<!-- IVs & EVs PAGE -->
+<div class="page" id="page-ivev">
+  <div class="page-title">📊 IVs & EVs</div>
+  <div class="page-sub">Guia completo sobre Individual Values e Effort Values nos jogos Pokémon.</div>
+
+  <div class="ivev-section">
+    <div class="ivev-card">
+      <h3 style="color:var(--accent);">IVs — Individual Values</h3>
+      <p>Os <strong>IVs (Individual Values)</strong> são valores genéticos únicos de cada Pokémon. Eles variam de <strong>0 a 31</strong> para cada atributo e são determinados no momento em que o Pokémon é obtido.</p>
+      <p>Um IV de <strong>31</strong> representa o máximo possível — esse Pokémon nasceu "perfeito" naquele atributo.</p>
+      <p>IVs afetam diretamente o valor final do atributo. Por exemplo, um Pokémon com 31 IVs em Ataque terá o maior Ataque possível para sua espécie e nível.</p>
+      <p style="color:var(--accent);font-weight:700;">Como verificar: Use o Avaliador em jogos modernos (Pokémon HOME, Box UI).</p>
+      <table class="ev-table" style="margin-top:12px;">
+        <tr><th>IV</th><th>Avaliação</th><th>Estrelas</th></tr>
+        <tr><td>0</td><td>No Good</td><td>0 ⭐</td></tr>
+        <tr><td>1–15</td><td>Decent</td><td>1 ⭐</td></tr>
+        <tr><td>16–25</td><td>Pretty Good</td><td>2 ⭐</td></tr>
+        <tr><td>26–29</td><td>Very Good</td><td>3 ⭐</td></tr>
+        <tr><td>30</td><td>Fantastic</td><td>4 ⭐</td></tr>
+        <tr><td>31</td><td>Best</td><td>5 ⭐</td></tr>
+      </table>
+    </div>
+    <div class="ivev-card">
+      <h3 style="color:var(--accent2);">EVs — Effort Values</h3>
+      <p>Os <strong>EVs (Effort Values)</strong> são pontos de esforço ganhos ao vencer batalhas. Cada Pokémon derrotado dá EVs específicos conforme sua espécie.</p>
+      <p>Máximo de <strong>252 EVs</strong> por atributo, e <strong>510 EVs totais</strong>. A cada 4 EVs = +1 ponto no atributo (com cap de 63 pontos extras por atributo).</p>
+      <p>Estratégia competitiva comum: <strong>252/252/4</strong> — maximizar dois atributos principais.</p>
+      <p style="color:var(--accent2);font-weight:700;">Como treinar: Use Super Treino, Poffins, participação em batalhas, itens Power.</p>
+      <table class="ev-table" style="margin-top:12px;">
+        <tr><th>Método</th><th>EVs ganhos</th></tr>
+        <tr><td>Vencer batalha</td><td>1–3 EVs (varia)</td></tr>
+        <tr><td>Vitaminas (HP Up, etc.)</td><td>+10 EVs</td></tr>
+        <tr><td>Itens Power</td><td>+8 EVs extras</td></tr>
+        <tr><td>Macho Brace</td><td>Dobra EVs ganhos</td></tr>
+        <tr><td>Frutas (Pomeg, etc.)</td><td>-10 EVs</td></tr>
+        <tr><td>Super Treino (Gen 6+)</td><td>Controle preciso</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-header"><h2>Cálculo de Atributos</h2></div>
+  <div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:24px;">
+    <p style="margin-bottom:16px;color:var(--muted);">Fórmulas usadas para calcular os atributos finais de um Pokémon no nível 100:</p>
+    <div style="background:var(--bg3);border-radius:10px;padding:16px;margin-bottom:12px;font-family:monospace;font-size:13px;border-left:3px solid var(--accent);">
+      <strong style="color:var(--accent);">HP</strong> = floor(((2×Base + IV + floor(EV/4)) × Nível / 100) + Nível + 10)
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:16px;font-family:monospace;font-size:13px;border-left:3px solid var(--accent2);">
+      <strong style="color:var(--accent2);">Outro atributo</strong> = floor((floor(((2×Base + IV + floor(EV/4)) × Nível / 100) + 5) × Natureza))
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">EXEMPLO — Charizard (Nível 100)</div>
+        <div style="font-size:13px;">Base Atq Esp: <strong>109</strong></div>
+        <div style="font-size:13px;">IV: <strong>31</strong> | EV: <strong>252</strong></div>
+        <div style="font-size:13px;">Natureza +: <strong>×1.1</strong></div>
+        <div style="font-size:14px;color:var(--accent);margin-top:6px;font-weight:800;">Atq Esp final: <strong>359</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header"><h2>Pokérus</h2><span>O vírus que dobra EVs!</span></div>
+  <div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;">
+    <p style="color:var(--muted);line-height:1.7;font-size:14px;">O <strong style="color:var(--accent);">Pokérus</strong> é um vírus extremamente raro (1/21.845 chance) que dobra os EVs ganhos em batalha. Um Pokémon infectado contagia outros da equipe. O vírus dura 1–4 dias mas o efeito permanece após a cura.</p>
+  </div>
+
+  <div class="section-header"><h2>Vitaminas & Itens de EV</h2></div>
+  <div style="overflow:auto;border-radius:12px;border:1px solid var(--border);">
+    <table class="ev-table" style="width:100%;">
+      <tr><th>Item</th><th>Efeito</th><th>Atributo</th><th>Preço</th></tr>
+      <tr><td>HP Up</td><td>+10 EVs HP</td><td>HP</td><td>10.000₽</td></tr>
+      <tr><td>Protein</td><td>+10 EVs Atq</td><td>Ataque</td><td>10.000₽</td></tr>
+      <tr><td>Iron</td><td>+10 EVs Def</td><td>Defesa</td><td>10.000₽</td></tr>
+      <tr><td>Calcium</td><td>+10 EVs Atq Esp</td><td>Ataque Especial</td><td>10.000₽</td></tr>
+      <tr><td>Zinc</td><td>+10 EVs Def Esp</td><td>Defesa Especial</td><td>10.000₽</td></tr>
+      <tr><td>Carbos</td><td>+10 EVs Vel</td><td>Velocidade</td><td>10.000₽</td></tr>
+      <tr><td>Power Weight</td><td>+8 EVs HP/batalha</td><td>HP</td><td>—</td></tr>
+      <tr><td>Power Bracer</td><td>+8 EVs Atq/batalha</td><td>Ataque</td><td>—</td></tr>
+      <tr><td>Power Belt</td><td>+8 EVs Def/batalha</td><td>Defesa</td><td>—</td></tr>
+      <tr><td>Power Lens</td><td>+8 EVs Atq Esp/batalha</td><td>Ataque Especial</td><td>—</td></tr>
+      <tr><td>Power Band</td><td>+8 EVs Def Esp/batalha</td><td>Defesa Especial</td><td>—</td></tr>
+      <tr><td>Power Anklet</td><td>+8 EVs Vel/batalha</td><td>Velocidade</td><td>—</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- POKEMON MODAL -->
+<div class="modal-overlay" id="poke-modal" onclick="closeModalOnBg(event)">
+  <div class="modal" id="poke-modal-inner">
+    <button class="modal-close" onclick="closePokeModal()">×</button>
+    <div id="modal-content"><div class="loader"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- ITEM MODAL -->
+<div class="modal-overlay" id="item-modal" onclick="closeModalOnBg2(event)">
+  <div class="modal" id="item-modal-inner">
+    <button class="modal-close" onclick="closeItemModal()">×</button>
+    <div id="item-modal-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ TYPES ============
+const TYPES_PT = {normal:'Normal',fire:'Fogo',water:'Água',electric:'Elétrico',grass:'Planta',ice:'Gelo',fighting:'Lutador',poison:'Veneno',ground:'Terra',flying:'Voador',psychic:'Psíquico',bug:'Inseto',rock:'Pedra',ghost:'Fantasma',dragon:'Dragão',dark:'Sombrio',steel:'Aço',fairy:'Fada'};
+const TYPE_COLORS = {normal:'#A8A77A',fire:'#EE8130',water:'#6390F0',electric:'#F7D02C',grass:'#7AC74C',ice:'#96D9D6',fighting:'#C22E28',poison:'#A33EA1',ground:'#E2BF65',flying:'#A98FF3',psychic:'#F95587',bug:'#A6B91A',rock:'#B6A136',ghost:'#735797',dragon:'#6F35FC',dark:'#705746',steel:'#B7B7CE',fairy:'#D685AD'};
+
+const GEN_RANGES = {1:[1,151],2:[152,251],3:[252,386],4:[387,493],5:[494,649],6:[650,721],7:[722,809],8:[810,905],9:[906,1025],10:[1026,1028]};
+const STAT_COLORS = {hp:'#ff5959',attack:'#f5ac78',defense:'#fae078','special-attack':'#9db7f5','special-defense':'#a7db8d',speed:'#fa92b2'};
+function statColor(s){return{hp:'#ff5959',attack:'#f5ac78',defense:'#fae078','special-attack':'#9db7f5','special-defense':'#a7db8d',speed:'#fa92b2'}[s]||'#7ab';}
+const STAT_PT = {hp:'HP',attack:'Ataque',defense:'Defesa','special-attack':'Atq. Esp.','special-defense':'Def. Esp.',speed:'Velocidade'};
+
+// ============ STATE ============
+let allPokemon = [], displayedPokemon = [], filteredPokemon = [];
+let currentGen = 'all', currentType = '', currentSearch = '';
+let pokeOffset = 0, pokeLimit = 60;
+
+let allItems = [], displayedItems = [], filteredItems = [];
+let itemOffset = 0, itemLimit = 80, itemCategories = new Set();
+
+let allBerries = [], displayedBerries = [];
+let allMoves = [], displayedMoves = [], filteredMoves = [];
+let allNatures = [];
+
+let pagesLoaded = {items:false, berries:false, moves:false, natures:false};
+let currentPage = 'pokemon';
+
+// ============ NAV ============
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  const nav = Array.from(document.querySelectorAll('nav button')).find(b=>b.getAttribute('onclick')===`navigate('${page}')`);
+  if(nav)nav.classList.add('active');
+  currentPage = page;
+  if(page==='items'&&!pagesLoaded.items){loadItems();pagesLoaded.items=true;}
+  if(page==='berries'&&!pagesLoaded.berries){loadBerries();pagesLoaded.berries=true;}
+  if(page==='moves'&&!pagesLoaded.moves){loadMoves();pagesLoaded.moves=true;}
+  if(page==='natures'&&!pagesLoaded.natures){loadNatures();pagesLoaded.natures=true;}
+}
+
+// ============ HELPERS ============
+function typeBadge(type){const c=TYPE_COLORS[type]||'#888';return`<span class="type-badge" style="background:${c}">${TYPES_PT[type]||type}</span>`;}
+function capitalize(s){return s?s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'';}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+async function api(url){
+  try{const r=await fetch(url);if(!r.ok)throw new Error('API error');return r.json();}catch(e){return null;}
+}
+
+function pokeImg(id){
+  if(id===1026) return 'assets/genx/browt.png';
+  if(id===1027) return 'assets/genx/pombon.png';
+  if(id===1028) return 'assets/genx/gecqua.png';
+  if(id<=649)return`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+  return`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+}
+function pokeSprite(id){
+  if(id===1026) return 'assets/genx/browt.png';
+  if(id===1027) return 'assets/genx/pombon.png';
+  if(id===1028) return 'assets/genx/gecqua.png';
+  return`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+}
+
+// ============ POKEMON PAGE ============
+async function initPokemon(){
+  const r=await api('https://pokeapi.co/api/v2/pokemon?limit=1025&offset=0');
+  if(!r)return;
+  allPokemon=r.results.map((p,i)=>({name:p.name,id:i+1,url:p.url}));
+  
+  // Inject Gen X Starters
+  allPokemon.push(
+    {name:'browt',id:1026,url:''},
+    {name:'pombon',id:1027,url:''},
+    {name:'gecqua',id:1028,url:''}
+  );
+
+  filteredPokemon=[...allPokemon];
+  renderPokeGrid();
+}
+
+function setGen(gen,btn){
+  document.querySelectorAll('.gen-filters .pill-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentGen=gen;
+  filterPokemon();
+}
+
+function filterPokemon(){
+  currentSearch=document.getElementById('poke-search').value.toLowerCase();
+  currentType=document.getElementById('type-filter').value;
+  let f=allPokemon.filter(p=>{
+    const matchSearch=p.name.includes(currentSearch)||String(p.id).includes(currentSearch);
+    let matchGen=true;
+    if(currentGen!=='all'){const r=GEN_RANGES[currentGen];matchGen=p.id>=r[0]&&p.id<=r[1];}
+    return matchSearch&&matchGen;
+  });
+  filteredPokemon=f;
+  pokeOffset=0;
+  document.getElementById('poke-grid').innerHTML='';
+  if(currentType){
+    // Filter by type requires loading data — only filter from already loaded cards
+    renderPokeGrid(true);
+  }else{
+    renderPokeGrid();
+  }
+}
+
+async function renderPokeGrid(typeFilter=false){
+  const grid=document.getElementById('poke-grid');
+  const loader=document.getElementById('poke-loader');
+  const loadMoreBtn=document.getElementById('load-more');
+  loader.style.display='block';
+
+  const slice=filteredPokemon.slice(pokeOffset,pokeOffset+pokeLimit);
+  
+  if(typeFilter&&currentType){
+    // load basic data for each and filter
+    const results=await Promise.all(slice.map(p=>api(`https://pokeapi.co/api/v2/pokemon/${p.id}`)));
+    const filtered=results.filter(p=>p&&p.types.some(t=>t.type.name===currentType));
+    filtered.forEach(p=>grid.insertAdjacentHTML('beforeend',pokeCardHTML(p)));
+  }else{
+    // Render cards quickly without fetching each (use deferred type loading)
+    slice.forEach(p=>{
+      grid.insertAdjacentHTML('beforeend',pokeCardHTMLBasic(p));
+    });
+    // Lazy load types
+    lazyLoadTypes(slice);
+  }
+
+  pokeOffset+=slice.length;
+  loader.style.display='none';
+  loadMoreBtn.style.display=(pokeOffset<filteredPokemon.length)?'flex':'none';
+  loadMoreBtn.style.justifyContent='center';
+}
+
+function pokeCardHTMLBasic(p){
+  const genColor=getGenColor(p.id);
+  return`<div class="poke-card" id="card-${p.id}" onclick="openPokemon(${p.id})" style="border-color:${genColor}22;">
+    <div class="poke-number">#${String(p.id).padStart(4,'0')}</div>
+    <img class="poke-img" src="${pokeImg(p.id)}" alt="${p.name}" loading="lazy" onerror="this.src='${pokeSprite(p.id)}'">
+    <div class="poke-name">${capitalize(p.name)}</div>
+    <div class="types" id="types-${p.id}"><span class="type-badge" style="background:#555">—</span></div>
+  </div>`;
+}
+
+function pokeCardHTML(p){
+  const types=p.types.map(t=>typeBadge(t.type.name)).join('');
+  const id=p.id;
+  return`<div class="poke-card" onclick="openPokemon(${id})">
+    <div class="poke-number">#${String(id).padStart(4,'0')}</div>
+    <img class="poke-img" src="${pokeImg(id)}" alt="${p.name}" loading="lazy" onerror="this.src='${pokeSprite(id)}'">
+    <div class="poke-name">${capitalize(p.name)}</div>
+    <div class="types">${types}</div>
+  </div>`;
+}
+
+async function lazyLoadTypes(slice){
+  const batchSize=20;
+  for(let i=0;i<slice.length;i+=batchSize){
+    const batch=slice.slice(i,i+batchSize);
+    await Promise.all(batch.map(async p=>{
+      const data=await api(`https://pokeapi.co/api/v2/pokemon/${p.id}`);
+      if(data){
+        const el=document.getElementById(`types-${p.id}`);
+        if(el)el.innerHTML=data.types.map(t=>typeBadge(t.type.name)).join('');
+      }
+    }));
+    await new Promise(r=>setTimeout(r,50));
+  }
+}
+
+async function loadMorePokemon(){
+  if(currentType){
+    await renderPokeGrid(true);
+  }else{
+    await renderPokeGrid();
+  }
+}
+
+function getGenColor(id){
+  if(id<=151)return'#ef5350';
+  if(id<=251)return'#ab47bc';
+  if(id<=386)return'#26a69a';
+  if(id<=493)return'#42a5f5';
+  if(id<=649)return'#66bb6a';
+  if(id<=721)return'#ffa726';
+  if(id<=809)return'#ec407a';
+  if(id<=905)return'#26c6da';
+  return'#bdbdbd';
+}
+
+function changeShinyArt(id,isShiny){
+  const img=document.getElementById('modal-main-img');
+  if(id >= 1026) {
+    // Gen X starters don't have shiny art yet, use same
+    const art = id===1026?'assets/genx/browt.png':id===1027?'assets/genx/pombon.png':'assets/genx/gecqua.png';
+    img.src = art;
+    img.setAttribute('onerror',`this.onerror=null;`);
+    return;
+  }
+  const art=isShiny?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`:`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+  const fallback=isShiny?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`:`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+  img.src=art;
+  img.setAttribute('onerror',`this.src='${fallback}';this.onerror=null;`);
+}
+
+async function openPokemon(id){
+  document.getElementById('poke-modal').classList.add('open');
+  document.getElementById('modal-content').innerHTML='<div class="loader"><div class="spinner"></div><p>Carregando Pokémon...</p></div>';
+  
+  let poke, spec;
+  if(id >= 1026) {
+    // Gen X Manual Data
+    const genXDB = {
+      1026: { name: 'browt', types: [{type:{name:'grass'}}], stats: [{base_stat:45,stat:{name:'hp'}},{base_stat:49,stat:{name:'attack'}},{base_stat:49,stat:{name:'defense'}},{base_stat:65,stat:{name:'special-attack'}},{base_stat:65,stat:{name:'special-defense'}},{base_stat:45,stat:{name:'speed'}}], weight: 50, height: 3, base_experience: 64, abilities: [{ability:{name:'overgrow',url:'https://pokeapi.co/api/v2/ability/65/'}}], genus: 'Pokémon Broto', flavor: 'Um pequeno pássaro que carrega a energia das florestas em suas asas.', moves: [{move:{name:'tackle'},version_group_details:[{level_learned_at:1,move_learn_method:{name:'level-up'}}]},{move:{name:'leafage'},version_group_details:[{level_learned_at:1,move_learn_method:{name:'level-up'}}]}] },
+      1027: { name: 'pombon', types: [{type:{name:'fire'}}], stats: [{base_stat:39,stat:{name:'hp'}},{base_stat:52,stat:{name:'attack'}},{base_stat:43,stat:{name:'defense'}},{base_stat:60,stat:{name:'special-attack'}},{base_stat:50,stat:{name:'special-defense'}},{base_stat:65,stat:{name:'speed'}}], weight: 85, height: 4, base_experience: 62, abilities: [{ability:{name:'blaze',url:'https://pokeapi.co/api/v2/ability/66/'}}], genus: 'Pokémon Cachorro de Fogo', flavor: 'Sua pelagem felpuda armazena calor e brilha como brasas quando está animado.', moves: [{move:{name:'tackle'},version_group_details:[{level_learned_at:1,move_learn_method:{name:'level-up'}}]},{move:{name:'ember'},version_group_details:[{level_learned_at:1,move_learn_method:{name:'level-up'}}]}] },
+      1028: { name: 'gecqua', types: [{type:{name:'water'}}], stats: [{base_stat:44,stat:{name:'hp'}},{base_stat:48,stat:{name:'attack'}},{base_stat:65,stat:{name:'defense'}},{base_stat:50,stat:{name:'special-attack'}},{base_stat:64,stat:{name:'special-defense'}},{base_stat:43,stat:{name:'speed'}}], weight: 90, height: 5, base_experience: 63, abilities: [{ability:{name:'torrent',url:'https://pokeapi.co/api/v2/ability/67/'}}], genus: 'Pokémon Lagartixa Aquática', flavor: 'Consegue escalar superfícies úmidas com facilidade e expele jatos de água gelada.', moves: [{move:{name:'tackle'},version_group_details:[{level_learned_at:1,move_learn_method:{name:'level-up'}}]},{move:{name:'water-gun'},version_group_details:[{level_learned_at:1,move_learn_method:{name:'level-up'}}]}] }
+    };
+    const data = genXDB[id];
+    poke = data;
+    spec = { 
+      genera: [{language:{name:'en'},genus:data.genus}], 
+      flavor_text_entries: [{language:{name:'en'},flavor_text:data.flavor}],
+      capture_rate: 45, base_happiness: 50, growth_rate: {name:'medium-slow'}, generation: {name:'generation-x'}, is_legendary: false, is_mythical: false, color: {name:'various'}, shape: {name:'quadruped'}, habitat: {name:'islands'}, egg_groups: [{name:'unknown'}]
+    };
+  } else {
+    [poke, spec] = await Promise.all([
+      api(`https://pokeapi.co/api/v2/pokemon/${id}`),
+      api(`https://pokeapi.co/api/v2/pokemon-species/${id}`)
+    ]);
+  }
+  if(!poke){document.getElementById('modal-content').innerHTML='<p>Erro ao carregar Pokémon.</p>';return;}
+  
+  const types=poke.types.map(t=>typeBadge(t.type.name)).join('');
+  const mainType=poke.types[0].type.name;
+  const color=TYPE_COLORS[mainType]||'#888';
+  
+  const flavor=spec?.flavor_text_entries?.find(e=>e.language.name==='en')?.flavor_text?.replace(/\f|\n/g,' ')||'';
+  const genus=spec?.genera?.find(g=>g.language.name==='en')?.genus||'';
+  
+  const statsHTML=poke.stats.map(s=>{
+    const n=s.stat.name;
+    const v=s.base_stat;
+    const pct=Math.min(100,Math.round(v/255*100));
+    return`<div class="stat-row">
+      <div class="stat-name">${STAT_PT[n]||n}</div>
+      <div class="stat-val">${v}</div>
+      <div class="stat-bar"><div class="stat-fill" style="width:${pct}%;background:${statColor(n)}"></div></div>
+    </div>`;
+  }).join('');
+  const totalBST=poke.stats.reduce((a,s)=>a+s.base_stat,0);
+
+  const moves=poke.moves.filter(m=>m.version_group_details.some(v=>v.move_learn_method.name==='level-up')).sort((a,b)=>{
+    const la=a.version_group_details.find(v=>v.move_learn_method.name==='level-up');
+    const lb=b.version_group_details.find(v=>v.move_learn_method.name==='level-up');
+    return(la?.level_learned_at||0)-(lb?.level_learned_at||0);
+  });
+  const movesHTML=moves.slice(0,40).map(m=>{
+    const lv=m.version_group_details.find(v=>v.move_learn_method.name==='level-up')?.level_learned_at||'?';
+    return`<tr><td>Nv.${lv}</td><td style="text-transform:capitalize;font-weight:700;">${m.move.name.replace(/-/g,' ')}</td></tr>`;
+  }).join('');
+
+  const abilitiesHTML=poke.abilities.map(a=>`
+    <div class="ability-card">
+      <div class="ability-name">${capitalize(a.ability.name)}${a.is_hidden?'<span class="hidden-badge">Oculta</span>':''}</div>
+      <div class="ability-desc">Carregando...</div>
+    </div>
+  `).join('');
+
+  const shinyImg=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
+  const maleImg=pokeImg(id);
+
+  document.getElementById('modal-content').innerHTML=`
+    <div class="modal-header" style="background:linear-gradient(135deg,${color}15,transparent);border-radius:16px;padding:20px;">
+      <div>
+        <img id="modal-main-img" class="modal-img" src="${maleImg}" onerror="this.src='${pokeSprite(id)}'">
+        <div style="display:flex;gap:8px;margin-top:8px;justify-content:center;">
+          <button class="btn btn-sm btn-outline" onclick="changeShinyArt(${id},false)">Normal</button>
+          <button class="btn btn-sm btn-outline" onclick="changeShinyArt(${id},true)" style="border-color:#f7c948;color:#f7c948;">✨ Shiny</button>
+        </div>
+      </div>
+      <div class="modal-title-area">
+        <div class="poke-number" style="color:${color};">#${String(id).padStart(4,'0')} • ${genus}</div>
+        <h2>${capitalize(poke.name)}</h2>
+        <div class="types" style="justify-content:flex-start;margin:8px 0;">${types}</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:380px;">${flavor}</div>
+        <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+          <div><span style="color:var(--muted);font-size:12px;">Peso</span><br><strong>${(poke.weight/10).toFixed(1)} kg</strong></div>
+          <div><span style="color:var(--muted);font-size:12px;">Altura</span><br><strong>${(poke.height/10).toFixed(1)} m</strong></div>
+          <div><span style="color:var(--muted);font-size:12px;">Exp. Base</span><br><strong>${poke.base_experience||'—'}</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-tabs">
+      <button class="tab-btn active" onclick="switchTab('stats',this)">📊 Stats</button>
+      <button class="tab-btn" onclick="switchTab('abilities',this)">💫 Habilidades</button>
+      <button class="tab-btn" onclick="switchTab('moves',this)">⚡ Ataques</button>
+      <button class="tab-btn" onclick="switchTab('evo',this,${id})">🔄 Evolução</button>
+      <button class="tab-btn" onclick="switchTab('info',this)">ℹ️ Info</button>
+    </div>
+    <div class="tab-content active" id="tab-stats">
+      <div class="stats-grid">${statsHTML}</div>
+      <div style="margin-top:12px;text-align:right;font-size:13px;color:var(--muted);">Total BST: <strong style="color:var(--accent);">${totalBST}</strong></div>
+    </div>
+    <div class="tab-content" id="tab-abilities">${abilitiesHTML}</div>
+    <div class="tab-content" id="tab-moves">
+      <div class="moves-table-wrap"><table class="moves-table">
+        <thead><tr><th>Nível</th><th>Ataque</th></tr></thead>
+        <tbody>${movesHTML}</tbody>
+      </table></div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted);">Mostrando ataques aprendidos por nível. Total: ${poke.moves.length} ataques.</div>
+    </div>
+    <div class="tab-content" id="tab-evo"><div class="loader"><div class="spinner"></div></div></div>
+    <div class="tab-content" id="tab-info">
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label">Nº Pokédex</div><div class="info-value">#${String(id).padStart(4,'0')}</div></div>
+        <div class="info-card"><div class="info-label">Espécie</div><div class="info-value">${genus}</div></div>
+        <div class="info-card"><div class="info-label">Taxa de Captura</div><div class="info-value">${spec?.capture_rate??'—'}/255</div></div>
+        <div class="info-card"><div class="info-label">Felicidade Base</div><div class="info-value">${spec?.base_happiness??'—'}</div></div>
+        <div class="info-card"><div class="info-label">Taxa de Crescimento</div><div class="info-value">${capitalize(spec?.growth_rate?.name||'—')}</div></div>
+        <div class="info-card"><div class="info-label">Passos p/ Chocar</div><div class="info-value">${spec?.hatch_counter?`${spec.hatch_counter*255} passos`:'—'}</div></div>
+        <div class="info-card"><div class="info-label">Geração</div><div class="info-value">${capitalize(spec?.generation?.name||'—')}</div></div>
+        <div class="info-card"><div class="info-label">É Lendário?</div><div class="info-value">${spec?.is_legendary?'✅ Sim':'❌ Não'}</div></div>
+        <div class="info-card"><div class="info-label">É Místico?</div><div class="info-value">${spec?.is_mythical?'✅ Sim':'❌ Não'}</div></div>
+        <div class="info-card"><div class="info-label">Cor</div><div class="info-value">${capitalize(spec?.color?.name||'—')}</div></div>
+        <div class="info-card"><div class="info-label">Forma</div><div class="info-value">${capitalize(spec?.shape?.name||'—')}</div></div>
+        <div class="info-card"><div class="info-label">Habitat</div><div class="info-value">${capitalize(spec?.habitat?.name||'—')}</div></div>
+        <div class="info-card"><div class="info-label">Grupos de Ovo</div><div class="info-value">${spec?.egg_groups?.map(g=>capitalize(g.name)).join(', ')||'—'}</div></div>
+        <div class="info-card"><div class="info-label">Razão de Gênero</div><div class="info-value">${spec?.gender_rate===-1?'Sem gênero':spec?`${Math.round((8-spec.gender_rate)/8*100)}% ♂`:'—'}</div></div>
+      </div>
+    </div>`;
+
+  // Load abilities
+  poke.abilities.forEach(async(a,i)=>{
+    const data=await api(a.ability.url);
+    const desc=data?.effect_entries?.find(e=>e.language.name==='en')?.short_effect||'Sem descrição disponível.';
+    const cards=document.querySelectorAll('#tab-abilities .ability-desc');
+    if(cards[i])cards[i].textContent=desc;
+  });
+
+  if(spec){
+    window._currentEvoChainUrl=spec.evolution_chain?.url;
+    window._currentPokeId=id;
+  }
+}
+
+async function switchTab(name,btn,pokeId){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='evo'&&window._currentEvoChainUrl){
+    const evoEl=document.getElementById('tab-evo');
+    if(evoEl.querySelector('.spinner')){
+      const chain=await api(window._currentEvoChainUrl);
+      evoEl.innerHTML=chain?renderEvoChain(chain.chain):'<p style="color:var(--muted);">Sem cadeia evolutiva.</p>';
+    }
+  }
+}
+
+function renderEvoChain(chain){
+  let html='<div class="evo-chain">';
+  function addNode(node){
+    const id=node.species.url.split('/').filter(Boolean).pop();
+    html+=`<div class="evo-item" onclick="closePokeModal();setTimeout(()=>openPokemon(${id}),200)">
+      <img src="${pokeImg(id)}" onerror="this.src='${pokeSprite(id)}'">
+      <span>#${String(id).padStart(3,'0')}</span>
+      <span>${capitalize(node.species.name)}</span>
+    </div>`;
+    if(node.evolves_to.length){
+      const trigger=node.evolves_to[0].evolution_details[0];
+      let trigText='';
+      if(trigger?.min_level)trigText=`Nv.${trigger.min_level}`;
+      else if(trigger?.item)trigText=`${capitalize(trigger.item.name)}`;
+      else if(trigger?.trigger?.name)trigText=capitalize(trigger.trigger.name);
+      html+=`<div class="evo-arrow">→<span class="evo-trigger">${trigText}</span></div>`;
+      node.evolves_to.forEach(e=>addNode(e));
+    }
+  }
+  addNode(chain);
+  html+='</div>';
+  return html;
+}
+
+function closePokeModal(){document.getElementById('poke-modal').classList.remove('open');}
+function closeModalOnBg(e){if(e.target===document.getElementById('poke-modal'))closePokeModal();}
+
+// ============ ITEMS ============
+async function loadItems(){
+  const loader=document.getElementById('items-loader');
+  const r=await api('https://pokeapi.co/api/v2/item?limit=2000&offset=0');
+  if(!r){loader.style.display='none';return;}
+  allItems=r.results;
+  filteredItems=[...allItems];
+  itemOffset=0;
+  await renderItems();
+}
+
+async function renderItems(){
+  const grid=document.getElementById('items-grid');
+  const loader=document.getElementById('items-loader');
+  const loadMoreBtn=document.getElementById('items-load-more');
+  loader.style.display='block';
+  const slice=filteredItems.slice(itemOffset,itemOffset+itemLimit);
+  const results=await Promise.all(slice.map(i=>api(i.url)));
+  results.forEach(item=>{
+    if(!item)return;
+    const cat=capitalize(item.category?.name||'');
+    itemCategories.add(item.category?.name||'');
+    const cost=item.cost?`${item.cost.toLocaleString()}₽`:'Invendável';
+    const img=item.sprites?.default||'';
+    grid.insertAdjacentHTML('beforeend',`
+      <div class="item-card" onclick="openItem(${item.id})">
+        ${img?`<img class="item-icon" src="${img}" alt="${item.name}" onerror="this.style.display='none'">`:'<div style="width:48px;height:48px;background:var(--border);border-radius:8px;flex-shrink:0;"></div>'}
+        <div class="item-info">
+          <div class="item-name">${capitalize(item.name)}</div>
+          <div class="item-cat">${cat}</div>
+          <div class="item-cost">💰 ${cost}</div>
+        </div>
+      </div>`);
+  });
+  itemOffset+=slice.length;
+  updateItemCatFilter();
+  loader.style.display='none';
+  loadMoreBtn.style.display=(itemOffset<filteredItems.length)?'flex':'none';
+  loadMoreBtn.style.justifyContent='center';
+}
+
+function updateItemCatFilter(){
+  const sel=document.getElementById('item-cat-filter');
+  const current=sel.value;
+  sel.innerHTML='<option value="">Todas as categorias</option>';
+  [...itemCategories].sort().forEach(c=>{
+    sel.insertAdjacentHTML('beforeend',`<option value="${c}">${capitalize(c)}</option>`);
+  });
+  sel.value=current;
+}
+
+async function loadMoreItems(){await renderItems();}
+
+function filterItems(){
+  const search=document.getElementById('item-search').value.toLowerCase();
+  const cat=document.getElementById('item-cat-filter').value;
+  // Basic name filter (categories already filtered via UI)
+  filteredItems=allItems.filter(i=>i.name.includes(search));
+  document.getElementById('items-grid').innerHTML='';
+  itemOffset=0;
+  renderItems();
+}
+
+async function openItem(id){
+  document.getElementById('item-modal').classList.add('open');
+  document.getElementById('item-modal-content').innerHTML='<div class="loader"><div class="spinner"></div></div>';
+  const item=await api(`https://pokeapi.co/api/v2/item/${id}`);
+  if(!item){document.getElementById('item-modal-content').innerHTML='<p>Erro.</p>';return;}
+  const desc=item.effect_entries?.find(e=>e.language.name==='en')?.effect||item.flavor_text_entries?.find(e=>e.language.name==='en')?.text||'Sem descrição.';
+  document.getElementById('item-modal-content').innerHTML=`
+    <div style="display:flex;gap:20px;align-items:center;margin-bottom:20px;flex-wrap:wrap;">
+      ${item.sprites?.default?`<img src="${item.sprites.default}" style="width:80px;height:80px;object-fit:contain;">`:''}
+      <div>
+        <div style="font-size:12px;color:var(--accent);font-weight:700;text-transform:uppercase;">${capitalize(item.category?.name||'')}</div>
+        <h2 style="font-size:20px;font-weight:900;margin:4px 0;">${capitalize(item.name)}</h2>
+        <div style="font-size:13px;color:var(--muted);">💰 ${item.cost?`${item.cost.toLocaleString()}₽`:'Invendável'}</div>
+      </div>
+    </div>
+    <div class="item-desc">${desc.replace(/\n/g,' ')}</div>
+    ${item.attributes?.length?`<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">${item.attributes.map(a=>`<span class="type-badge" style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);">${capitalize(a.name)}</span>`).join('')}</div>`:''}
+  `;
+}
+function closeItemModal(){document.getElementById('item-modal').classList.remove('open');}
+function closeModalOnBg2(e){if(e.target===document.getElementById('item-modal'))closeItemModal();}
+
+// ============ BERRIES ============
+async function loadBerries(){
+  const loader=document.getElementById('berries-loader');
+  const r=await api('https://pokeapi.co/api/v2/berry?limit=100');
+  if(!r){loader.style.display='none';return;}
+  const results=await Promise.all(r.results.map(b=>api(b.url)));
+  allBerries=results.filter(Boolean);
+  displayedBerries=[...allBerries];
+  renderBerries();
+  loader.style.display='none';
+}
+
+function renderBerries(){
+  const grid=document.getElementById('berries-grid');
+  grid.innerHTML='';
+  displayedBerries.forEach(berry=>{
+    const flavors=berry.flavors?.filter(f=>f.potency>0).map(f=>`${capitalize(f.flavor.name)} (${f.potency})`).join(', ')||'Sem sabor';
+    const itemId=berry.item?.url?.split('/').filter(Boolean).pop();
+    const img=itemId?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/berry-${berry.name.toLowerCase()}-berry.png`:'';
+    grid.insertAdjacentHTML('beforeend',`
+      <div class="berry-card" onclick="openBerry(${berry.id})">
+        <img class="berry-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${berry.name}-berry.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/oran-berry.png'">
+        <div class="berry-name">${capitalize(berry.name)} Berry</div>
+        <div class="berry-flavor">${flavors}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Tamanho: ${berry.size}mm | Firmeza: ${capitalize(berry.firmness?.name||'')}</div>
+      </div>`);
+  });
+}
+
+async function openBerry(id){
+  document.getElementById('item-modal').classList.add('open');
+  document.getElementById('item-modal-content').innerHTML='<div class="loader"><div class="spinner"></div></div>';
+  const berry=await api(`https://pokeapi.co/api/v2/berry/${id}`);
+  const item=berry?.item?await api(berry.item.url):null;
+  const desc=item?.effect_entries?.find(e=>e.language.name==='en')?.effect||item?.flavor_text_entries?.find(e=>e.language.name==='en')?.text||'Sem descrição.';
+  const flavors=berry?.flavors?.map(f=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:80px;font-size:12px;color:var(--muted);">${capitalize(f.flavor.name)}</span><div style="flex:1;background:var(--border);border-radius:4px;height:8px;"><div style="width:${f.potency/40*100}%;background:var(--accent);border-radius:4px;height:100%;"></div></div><span style="font-size:12px;">${f.potency}</span></div>`).join('')||'';
+  document.getElementById('item-modal-content').innerHTML=`
+    <div style="display:flex;gap:20px;align-items:center;margin-bottom:20px;">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${berry?.name}-berry.png" style="width:80px;height:80px;object-fit:contain;" onerror="this.style.display='none'">
+      <div>
+        <div style="font-size:12px;color:#7AC74C;font-weight:700;">🍒 BERRY</div>
+        <h2 style="font-size:20px;font-weight:900;margin:4px 0;">${capitalize(berry?.name||'')} Berry</h2>
+        <div style="font-size:13px;color:var(--muted);">Tamanho: ${berry?.size}mm • Suavidade: ${berry?.smoothness} • Tempo p/ crescer: ${berry?.growth_time}h</div>
+      </div>
+    </div>
+    <div class="item-desc" style="margin-bottom:20px;">${desc.replace(/\n/g,' ')}</div>
+    ${flavors?`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;"><div style="font-weight:700;margin-bottom:12px;font-size:13px;">Sabores</div>${flavors}</div>`:''}
+    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+      <div class="info-card"><div class="info-label">Máx. Colheita</div><div class="info-value">${berry?.max_harvest||'—'}</div></div>
+      <div class="info-card"><div class="info-label">Poder Natural</div><div class="info-value">${berry?.natural_gift_power||'—'}</div></div>
+      <div class="info-card"><div class="info-label">Tipo Natural Gift</div><div class="info-value">${typeBadge(berry?.natural_gift_type?.name||'normal')}</div></div>
+      <div class="info-card"><div class="info-label">Firmeza</div><div class="info-value">${capitalize(berry?.firmness?.name||'—')}</div></div>
+    </div>`;
+}
+
+function filterBerries(){
+  const search=document.getElementById('berry-search').value.toLowerCase();
+  displayedBerries=allBerries.filter(b=>b.name.includes(search));
+  renderBerries();
+}
+
+// ============ MOVES ============
+async function loadMoves(){
+  const loader=document.getElementById('moves-loader');
+  const r=await api('https://pokeapi.co/api/v2/move?limit=1000&offset=0');
+  if(!r){loader.style.display='none';return;}
+  // Load in batches
+  const batch1=r.results.slice(0,200);
+  const data=await Promise.all(batch1.map(m=>api(m.url)));
+  allMoves=data.filter(Boolean);
+  filteredMoves=[...allMoves];
+  renderMoves();
+  loader.style.display='none';
+  // Load rest in background
+  const rest=r.results.slice(200);
+  for(let i=0;i<rest.length;i+=100){
+    const batch=await Promise.all(rest.slice(i,i+100).map(m=>api(m.url)));
+    allMoves=[...allMoves,...batch.filter(Boolean)];
+    if(filteredMoves.length===allMoves.length-batch.filter(Boolean).length){
+      filteredMoves=[...allMoves];
+      renderMoves();
+    }
+    await new Promise(r=>setTimeout(r,100));
+  }
+}
+
+function renderMoves(){
+  const tbody=document.getElementById('moves-tbody');
+  tbody.innerHTML='';
+  const search=document.getElementById('move-search').value.toLowerCase();
+  const typeF=document.getElementById('move-type-filter').value;
+  const catF=document.getElementById('move-cat-filter').value;
+  let moves=filteredMoves.filter(m=>{
+    const matchS=m.name.replace(/-/g,' ').includes(search);
+    const matchT=!typeF||m.type?.name===typeF;
+    const matchC=!catF||m.damage_class?.name===catF;
+    return matchS&&matchT&&matchC;
+  });
+  moves.slice(0,500).forEach(m=>{
+    const desc=m.effect_entries?.find(e=>e.language.name==='en')?.short_effect?.replace(/\$effect_chance/g,m.effect_chance)||'—';
+    const catClass={'physical':'cat-physical','special':'cat-special','status':'cat-status'}[m.damage_class?.name]||'';
+    tbody.insertAdjacentHTML('beforeend',`<tr>
+      <td style="font-weight:800;text-transform:capitalize;">${m.name.replace(/-/g,' ')}</td>
+      <td>${typeBadge(m.type?.name||'normal')}</td>
+      <td><span class="move-cat ${catClass}">${capitalize(m.damage_class?.name||'—')}</span></td>
+      <td style="font-weight:700;">${m.power||'—'}</td>
+      <td>${m.accuracy?m.accuracy+'%':'—'}</td>
+      <td>${m.pp||'—'}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:300px;">${desc.substring(0,120)}${desc.length>120?'...':''}</td>
+    </tr>`);
+  });
+}
+
+function filterMoves(){renderMoves();}
+
+// ============ NATURES ============
+async function loadNatures(){
+  const r=await api('https://pokeapi.co/api/v2/nature?limit=25');
+  if(!r){document.getElementById('natures-content').innerHTML='<p>Erro.</p>';return;}
+  const natures=await Promise.all(r.results.map(n=>api(n.url)));
+  allNatures=natures.filter(Boolean);
+  renderNatures();
+}
+
+const STAT_NAME_PT={'attack':'Ataque','defense':'Defesa','special-attack':'Atq. Esp.','special-defense':'Def. Esp.','speed':'Velocidade','hp':'HP'};
+const FLAVOR_PT={spicy:'Picante',dry:'Seco',sweet:'Doce',bitter:'Amargo',sour:'Azedo'};
+
+function renderNatures(){
+  const el=document.getElementById('natures-content');
+  const rows=allNatures.map(n=>{
+    const up=n.increased_stat?.name?`<span class="up">↑ ${STAT_NAME_PT[n.increased_stat.name]||n.increased_stat.name}</span>`:`<span class="neutral">Neutro</span>`;
+    const down=n.decreased_stat?.name?`<span class="down">↓ ${STAT_NAME_PT[n.decreased_stat.name]||n.decreased_stat.name}</span>`:`<span class="neutral">Neutro</span>`;
+    const likes=n.likes_flavor?`🍬 ${FLAVOR_PT[n.likes_flavor.name]||n.likes_flavor.name}`:'—';
+    const hates=n.hates_flavor?`🚫 ${FLAVOR_PT[n.hates_flavor.name]||n.hates_flavor.name}`:'—';
+    return`<tr>
+      <td style="font-weight:800;">${capitalize(n.name)}</td>
+      <td>${up}</td><td>${down}</td>
+      <td style="font-size:12px;">${likes}</td>
+      <td style="font-size:12px;">${hates}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML=`
+    <div class="natures-table-wrap">
+      <table class="natures-table">
+        <thead><tr><th>Natureza</th><th>Aumenta</th><th>Diminui</th><th>Sabor preferido</th><th>Sabor odiado</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="margin-top:24px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:20px;">
+      <div style="font-weight:800;margin-bottom:12px;font-size:15px;">💡 Naturezas por atributo</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+        ${renderNaturesByAttr()}
+      </div>
+    </div>`;
+}
+
+function renderNaturesByAttr(){
+  const attrs=['attack','defense','special-attack','special-defense','speed'];
+  return attrs.map(attr=>{
+    const ups=allNatures.filter(n=>n.increased_stat?.name===attr).map(n=>capitalize(n.name)).join(', ');
+    const downs=allNatures.filter(n=>n.decreased_stat?.name===attr).map(n=>capitalize(n.name)).join(', ');
+    return`<div class="info-card">
+      <div class="info-label">${STAT_NAME_PT[attr]}</div>
+      <div style="font-size:12px;margin-top:4px;"><span style="color:#4caf50;font-weight:700;">↑</span> ${ups}</div>
+      <div style="font-size:12px;margin-top:4px;"><span style="color:var(--red);font-weight:700;">↓</span> ${downs}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============ INIT ============
+window.addEventListener('DOMContentLoaded',()=>{
+  initPokemon();
+});
+</script>
+</body>
+</html>
